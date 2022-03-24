@@ -87,9 +87,16 @@ def get_task():
 
 
 def start_program():
-    print(logo)
-    time.sleep(3)
+    bar = ' '*36
 
+    for i in range(0, 36):
+        os.system('cls')
+        print(logo)
+        bar = '/' + bar[:-1]
+        print('Starting |', bar, '|', sep='')
+        time.sleep(0.1)
+
+    print('\n')
     print('Сейчас будут выведены все обозначения и приставки.')
     time.sleep(2)
 
@@ -143,4 +150,4 @@ def main():
 
 if __name__ == '__main__':
     start_program()
-    main()
+    #main()
