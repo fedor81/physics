@@ -1,6 +1,7 @@
 import hashlib
 import math
 import os
+import pickle
 import random
 import time
 
@@ -25,6 +26,14 @@ units = {
     'метр': 'м', 'секунда': 'с', 'герц': 'Гц', 'грамм': 'г', 'ньютон': 'Н', 'паскаль': 'Па', 'джоуль': 'Дж',
     'ватт': 'Вт', 'кельвин': 'К', 'моль': 'моль', 'ампер': 'А', 'кулон': 'Кл', 'вольт': 'В', 'фарад': 'Ф', 'ом': 'Ом',
     'тесла': 'Тл', 'зиверт': 'Зв'
+}
+
+evaluation_system = {
+    (0, 59): '2', (60, 69): '3', (70, 89): '4', (90, 100): '5'
+}
+
+system_gradation = {
+    (0, 59): 'F', (60, 64): 'E', (65, 74): 'D', (75, 84): 'C', (85, 89): 'B', (90, 100): 'A'
 }
 
 
@@ -53,7 +62,7 @@ def get_number():
     if 'e' in str(number) or len(str(number)) > 10:
         return get_number()
 
-    number_degree = physics_prefixes[number_prefix]+number_difference
+    number_degree = physics_prefixes[number_prefix] + number_difference
     if number_degree == 0:
         number_degree = ''
     else:
@@ -69,14 +78,14 @@ def get_task():
 
     os.system('cls')
     print('\n')
-    print('Задание: представить число в стандартном виде:', task[0], end='\n'*3)
+    print('Задание: представить число в стандартном виде:', task[0], end='\n' * 3)
     text = input('Ответ: ')
     text = text.replace(' ', '')
     text = text.replace(',', '.', 1)
     text = text.lower()
     try:
         text_hash = hashlib.md5(text.encode()).hexdigest()
-    except:
+    except Exception:
         pass
     print('\n')
 
@@ -85,11 +94,35 @@ def get_task():
         correct_answer = True
     else:
         print('Неверно, правильный ответ:', task[1])
-    print('\n')
     pause_program()
     os.system('cls')
 
     return correct_answer
+
+
+def save_file(key, text, file):
+    try:
+        with open(file, 'rb') as f:
+            data = pickle.load(f)
+            if key in data:
+                data[key].append(text)
+            else:
+                data[key] = [text]
+
+        with open(file, 'wb') as f:
+            pickle.dump(data, f)
+
+    except Exception:
+        with open(file, 'wb') as f:
+            pickle.dump({key: [text]}, f)
+
+
+def clean_file(file):
+    try:
+        with open(file, 'wb') as f:
+            pickle.dump({}, f)
+    except Exception:
+        print(Exception)
 
 
 def start_program():
@@ -127,7 +160,7 @@ def output_info(text, *args, **kwargs):
     print('_' * 50, '\n')
     time.sleep(0.3)
     print(text)
-    time.sleep(1.5)
+    time.sleep(1.3)
     for i in range(len(args)):
         print(i, '=', args[i])
         time.sleep(0.175)
@@ -139,45 +172,47 @@ def output_info(text, *args, **kwargs):
 
 
 def pause_program():
+    print('\n')
     input('Нажмите Enter, чтобы продолжить. ')
 
 
 def main():
     print('\n')
     name = input('Введите ваше имя: ')
-    print('\n')
-    print('В режиме тренировки вы будете решать задания, пока правильно не ответите на 3 задания.')
-    while True:
+    pause_program()
+
+    hardmode = None
+    while not (hardmode is True or hardmode is False) or hardmode is None:
         os.system('cls')
         print('\n')
-        hardmod = input('Хотите включить режим тренировки? Yes/No ').lower()
+        print('В режиме тренировки вы будете решать задания, пока правильно не ответите на 3 задания.')
+        print('\n')
+        hardmode = input('Хотите включить режим тренировки? Введите Yes/No ').lower()
         print('\n')
 
-        if 'y' in hardmod:
-            hardmod = True
+        if 'y' in hardmode:
+            hardmode = True
             combo = 0
             n = 0
-        elif 'n' in hardmod:
-            hardmod = False
+        elif 'n' in hardmode:
+            hardmode = False
+            os.system('cls')
         else:
             print('Введены неверные данные.')
-            continue
-        break
 
-    while not hardmod:
+    while not hardmode:
         try:
             print('\n')
-            n = int(input('Введите количество заданий: '))
+            n = int(input('Сколько заданий будете решать: '))
             break
-        except:
+        except Exception:
             print('\n')
             print('Введены неверные данные.')
 
     scores = 0
-    print('\n')
     pause_program()
 
-    if hardmod:
+    if hardmode:
         while combo != 3:
             n += 1
             if get_task():
@@ -190,9 +225,26 @@ def main():
             if get_task():
                 scores += 1
 
+    percent = round(scores / n * 100, 2)
+    for i in evaluation_system:
+        if i[0] <= percent <= i[1]:
+            assessment = evaluation_system[i]
+            break
+
+    for i in system_gradation:
+        if i[0] <= percent <= i[1]:
+            final_assessment = assessment + system_gradation[i]
+            break
+
     print('\n')
-    print(f'Поздравляю {name}, вы решили {scores} из {n} заданий, ваш результат {round(scores/n*100, 2)}%')
-    print('\n')
+    print(f'Поздравляю {name}, вы решили {scores} из {n} заданий.\n\tВаш результат - {percent}%\n\tОценка - {assessment}')
+
+    if not hardmode:
+        if name:
+            name = name.lower()
+            name = name.replace(' ', '')
+            save_file(name, final_assessment, 'data.pickle')
+
     pause_program()
 
 
