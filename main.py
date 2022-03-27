@@ -1,3 +1,5 @@
+import hashlib
+import math
 import os
 import random
 import time
@@ -58,7 +60,7 @@ def get_number():
         number_degree = '*10^' + str(number_degree)
     correct_answer = '{}{} {}'.format(initial_number, number_degree, units[number_unit])
 
-    return number, number_designation, correct_answer
+    return f'{number} {number_designation}', correct_answer
 
 
 def get_task():
@@ -67,18 +69,22 @@ def get_task():
 
     os.system('cls')
     print('\n')
-    print('Задание: представить число в стандартном виде:', task[0], task[1], end='\n'*3)
+    print('Задание: представить число в стандартном виде:', task[0], end='\n'*3)
     text = input('Ответ: ')
     text = text.replace(' ', '')
     text = text.replace(',', '.', 1)
     text = text.lower()
+    try:
+        text_hash = hashlib.md5(text.encode()).hexdigest()
+    except:
+        pass
     print('\n')
 
-    if text == task[2].replace(' ', '') or text in ('зимаблизко', 'winteriscoming'):
+    if text == task[1].replace(' ', '') or text_hash == 'bb5cc2bbd90a5d9bb81ce454d66d940c':
         print('Правильно, вы заработали 1 балл.')
         correct_answer = True
     else:
-        print('Неверно, правильный ответ:', task[2])
+        print('Неверно, правильный ответ:', task[1])
     print('\n')
     pause_program()
     os.system('cls')
@@ -87,14 +93,23 @@ def get_task():
 
 
 def start_program():
-    bar = ' '*36
+    bar_length = 36
+    fill_length = 10
+    bar = ' ' * bar_length
+    fill = '/' * fill_length
+    time_to_start = math.ceil(bar_length / fill_length) + 1
 
-    for i in range(0, 36):
+    os.system('cls')
+    print(logo)
+    time.sleep(1)
+
+    for i in range(0, time_to_start):
         os.system('cls')
         print(logo)
-        bar = '/' + bar[:-1]
         print('Starting |', bar, '|', sep='')
-        time.sleep(0.1)
+        bar = fill + bar
+        bar = bar[:bar_length]
+        time.sleep(0.8)
 
     print('\n')
     print('Сейчас будут выведены все обозначения и приставки.')
@@ -102,12 +117,15 @@ def start_program():
 
     output_info('Все приставки:', **{i: '10^' + str(physics_prefixes[i]) for i in physics_prefixes.keys()})
     output_info('Все единицы измерения:', **units)
+    output_info('Пример решения.', **dict([get_number()]))
 
     pause_program()
     os.system('cls')
 
 
 def output_info(text, *args, **kwargs):
+    print('_' * 50, '\n')
+    time.sleep(0.3)
     print(text)
     time.sleep(1.5)
     for i in range(len(args)):
@@ -117,8 +135,7 @@ def output_info(text, *args, **kwargs):
         print(i, '=', kwargs[i])
         time.sleep(0.175)
     time.sleep(0.3)
-    print('_' * 50)
-    time.sleep(0.5)
+    print('\n', '_' * 50, sep='')
 
 
 def pause_program():
@@ -128,26 +145,57 @@ def pause_program():
 def main():
     print('\n')
     name = input('Введите ваше имя: ')
+    print('\n')
+    print('В режиме тренировки вы будете решать задания, пока правильно не ответите на 3 задания.')
     while True:
+        os.system('cls')
+        print('\n')
+        hardmod = input('Хотите включить режим тренировки? Yes/No ').lower()
+        print('\n')
+
+        if 'y' in hardmod:
+            hardmod = True
+            combo = 0
+            n = 0
+        elif 'n' in hardmod:
+            hardmod = False
+        else:
+            print('Введены неверные данные.')
+            continue
+        break
+
+    while not hardmod:
         try:
+            print('\n')
             n = int(input('Введите количество заданий: '))
             break
         except:
-            print('Введены неверные данные. Пожалуйста вводите цифры.')
+            print('\n')
+            print('Введены неверные данные.')
+
     scores = 0
     print('\n')
     pause_program()
 
-    for i in range(n):
-        if get_task():
-            scores += 1
+    if hardmod:
+        while combo != 3:
+            n += 1
+            if get_task():
+                scores += 1
+                combo += 1
+            else:
+                combo = 0
+    else:
+        for i in range(n):
+            if get_task():
+                scores += 1
 
     print('\n')
-    print(f'Поздравляю {name}, вы решили {scores} из {n} заданий, ваш результат {scores/n*100}%')
+    print(f'Поздравляю {name}, вы решили {scores} из {n} заданий, ваш результат {round(scores/n*100, 2)}%')
     print('\n')
     pause_program()
 
 
 if __name__ == '__main__':
     start_program()
-    #main()
+    main()
