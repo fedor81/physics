@@ -18,8 +18,8 @@ ______________________________________________
 """
 
 physics_prefixes = {
-    'деци': -1, 'санти': -2, 'милли': -3, 'микро': -6, 'нано': -9, 'пико': -12, 'фемто': -15, 'атто': -18, 'дека': 1,
-    'гекто': 2, 'кило': 3, 'мега': 6, 'гига': 9, 'тера': 12, 'пета': 15, 'экса': 18
+    'деци': -1, 'санти': -2, 'милли': -3, 'микро': -6, 'нано': -9, 'пико': -12, 'фемто': -15, 'атто': -18, 'Дека': 1,
+    'Гекто': 2, 'Кило': 3, 'Мега': 6, 'Гига': 9, 'Тера': 12, 'Пета': 15, 'Экса': 18
 }
 
 units = {
@@ -37,7 +37,7 @@ system_gradation = {
 }
 
 
-def get_number():
+def get_number(number_round):
     number_prefix = random.choice(list(physics_prefixes.keys()))
     number_unit = random.choice((list(units.keys())))
     number_designation = number_prefix + number_unit
@@ -50,8 +50,9 @@ def get_number():
 
     initial_number = 0
     while initial_number <= 1 or initial_number == 10:
-        initial_number = round(random.random() * 10, random.choice((1, 2, 3, 4, 5)))
+        initial_number = round(random.random() * 10, random.choice((1, 2, 3, 4, 5, 6)))
     number = initial_number * (10 ** number_difference)
+    initial_number = round(initial_number, number_round)
 
     if initial_number == int(initial_number):
         initial_number = int(initial_number)
@@ -60,7 +61,7 @@ def get_number():
         number = int(number)
 
     if 'e' in str(number) or len(str(number)) > 10:
-        return get_number()
+        return get_number(number_round)
 
     number_degree = physics_prefixes[number_prefix] + number_difference
     if number_degree == 0:
@@ -72,8 +73,8 @@ def get_number():
     return f'{number} {number_designation}', correct_answer
 
 
-def get_task():
-    task = get_number()
+def get_task(number_round):
+    task = get_number(number_round)
     correct_answer = False
 
     os.system('cls')
@@ -100,21 +101,60 @@ def get_task():
     return correct_answer
 
 
-def save_file(key, text, file):
+def set_training_mode():
+    global combo
+    combo = None
+    trainingMode = None
+
+    while not trainingMode is True or trainingMode is None:
+        os.system('cls')
+        print('\n')
+        print(
+            'В режиме тренировки вы будете решать задания, пока правильно не ответите на указанное количество заданий.',
+            '\nВ режиме тренировки результаты не сохраняются', sep='\n')
+        print('\n')
+        trainingMode = input('Хотите включить режим тренировки? Введите Yes/No ').lower()
+        print('\n')
+
+        if 'y' in trainingMode and not 'n' in trainingMode:
+            trainingMode = True
+        elif 'n' in trainingMode and not 'y' in trainingMode:
+            trainingMode = False
+            break
+        else:
+            get_error_program()
+            time.sleep(1)
+    else:
+        os.system('cls')
+        while True:
+            try:
+                print('\n')
+                combo = int(input('Сколько заданий нужно решить правильно, чтобы завершить режим тренировки: '))
+                if combo <= 0:
+                    raise ValueError
+                break
+            except Exception:
+                get_error_program()
+    os.system('cls')
+
+    return trainingMode
+
+
+def save_file(file, key, n, text):
     try:
         with open(file, 'rb') as f:
             data = pickle.load(f)
             if key in data:
-                data[key].append(text)
+                data[key].append((n, text))
             else:
-                data[key] = [text]
+                data[key] = [(n, text)]
 
         with open(file, 'wb') as f:
             pickle.dump(data, f)
 
     except Exception:
         with open(file, 'wb') as f:
-            pickle.dump({key: [text]}, f)
+            pickle.dump({key: [(n, text)]}, f)
 
 
 def clean_file(file):
@@ -174,55 +214,60 @@ def output_info(text, *args, **kwargs):
 def pause_program():
     print('\n')
     input('Нажмите Enter, чтобы продолжить. ')
+    os.system('cls')
+
+
+def get_error_program():
+    print('\n')
+    print('Введены неверные данные.')
 
 
 def main():
     print('\n')
-    name = input('Введите ваше имя: ')
-    pause_program()
+    name = input('Введите ваше имя или ключ: ')
 
-    hardmode = None
-    while not (hardmode is True or hardmode is False) or hardmode is None:
-        os.system('cls')
-        print('\n')
-        print('В режиме тренировки вы будете решать задания, пока правильно не ответите на 3 задания.')
-        print('\n')
-        hardmode = input('Хотите включить режим тренировки? Введите Yes/No ').lower()
-        print('\n')
+    trainingMode = set_training_mode()
 
-        if 'y' in hardmode:
-            hardmode = True
-            combo = 0
-            n = 0
-        elif 'n' in hardmode:
-            hardmode = False
-            os.system('cls')
-        else:
-            print('Введены неверные данные.')
-
-    while not hardmode:
+    while not trainingMode:
         try:
             print('\n')
             n = int(input('Сколько заданий будете решать: '))
+            if n <= 0:
+                raise ValueError
             break
         except Exception:
+            get_error_program()
+    else:
+        n = 0
+
+    os.system('cls')
+    while True:
+        try:
             print('\n')
-            print('Введены неверные данные.')
+            number_round = input('До какой степени в ответе округлять числа (10, 100, 1000 и тд.): ')
+            if int(number_round) and int(number_round) >= 0:
+                number_round = len(number_round) - 1
+                break
+            else:
+                raise ValueError
+        except Exception:
+            get_error_program()
 
     scores = 0
+    scores_combo = 0
     pause_program()
 
-    if hardmode:
-        while combo != 3:
+    if trainingMode:
+        while scores_combo != combo:
             n += 1
-            if get_task():
+            if get_task(number_round):
                 scores += 1
-                combo += 1
+                scores_combo += 1
             else:
-                combo = 0
+                scores_combo = 0
     else:
         for i in range(n):
-            if get_task():
+            if get_task(number_round):
                 scores += 1
 
     percent = round(scores / n * 100, 2)
@@ -237,13 +282,13 @@ def main():
             break
 
     print('\n')
-    print(f'Поздравляю {name}, вы решили {scores} из {n} заданий.\n\tВаш результат - {percent}%\n\tОценка - {assessment}')
+    print(
+        f'Поздравляю {name}, вы решили {scores} из {n} заданий.\n\tВаш результат - {percent}%\n\tОценка - {assessment}')
 
-    if not hardmode:
-        if name:
-            name = name.lower()
-            name = name.replace(' ', '')
-            save_file(name, final_assessment, 'data.pickle')
+    if not trainingMode and name:
+        name = name.lower()
+        name = name.replace(' ', '')
+        save_file('data.pickle', name, n, final_assessment)
 
     pause_program()
 
