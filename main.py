@@ -18,14 +18,15 @@ ______________________________________________
 """
 
 physics_prefixes = {
-    'деци': -1, 'санти': -2, 'милли': -3, 'микро': -6, 'нано': -9, 'пико': -12, 'фемто': -15, 'атто': -18, 'Дека': 1,
-    'Гекто': 2, 'Кило': 3, 'Мега': 6, 'Гига': 9, 'Тера': 12, 'Пета': 15, 'Экса': 18
+    'деци': -1, 'санти': -2, 'милли': -3, 'микро': -6, 'нано': -9, 'пико': -12, 'фемто': -15, 'атто': -18, 'зепто': -21,
+    'иокто': -24, 'дека': 1, 'гекто': 2, 'кило': 3, 'Мега': 6, 'Гига': 9, 'Тера': 12, 'Пета': 15, 'Экса': 18,
+    'Зетта': 21, 'Иотта': 24
 }
 
 units = {
-    'метр': 'м', 'секунда': 'с', 'герц': 'Гц', 'грамм': 'г', 'ньютон': 'Н', 'паскаль': 'Па', 'джоуль': 'Дж',
-    'ватт': 'Вт', 'кельвин': 'К', 'моль': 'моль', 'ампер': 'А', 'кулон': 'Кл', 'вольт': 'В', 'фарад': 'Ф', 'ом': 'Ом',
-    'тесла': 'Тл', 'зиверт': 'Зв'
+    'метр': 'м', 'секунда': 'с', 'Герц': 'Гц', 'грамм': 'г', 'Ньютон': 'Н', 'Паскаль': 'Па', 'Джоуль': 'Дж',
+    'Ватт': 'Вт', 'Кельвин': 'К', 'моль': 'моль', 'Ампер': 'А', 'Кулон': 'Кл', 'Вольт': 'В', 'Фарад': 'Ф', 'Ом': 'Ом',
+    'Тесла': 'Тл', 'Зиверт': 'Зв'
 }
 
 evaluation_system = {
@@ -44,8 +45,8 @@ def get_number(number_round):
 
     number_odds = (-1, -2, -3, -4, -5, -6, 1, 2, 3, 4, 5, 6)
     number_difference = random.choice(number_odds)
-    if not (number_prefix in ('тера', 'пета', 'экса') or number_difference > 0) or not (
-            number_prefix in ('пико', 'фемто', 'атто') or number_difference < -0):
+    if not (number_prefix in ('Пета', 'Экса', 'Зетта', 'Иотта') or number_difference > 0) or not (
+            number_prefix in ('фемто', 'атто', 'зепто', 'иокто') or number_difference < -0):
         number_difference = -number_difference
 
     initial_number = 0
@@ -90,7 +91,7 @@ def get_task(number_round):
         pass
     print('\n')
 
-    if text == task[1].replace(' ', '') or text_hash == 'bb5cc2bbd90a5d9bb81ce454d66d940c':
+    if text == task[1].replace(' ', '').lower() or text_hash == 'bb5cc2bbd90a5d9bb81ce454d66d940c':
         print('Правильно, вы заработали 1 балл.')
         correct_answer = True
     else:
@@ -110,8 +111,8 @@ def set_training_mode():
         os.system('cls')
         print('\n')
         print(
-            'В режиме тренировки вы будете решать задания, пока правильно не ответите на указанное количество заданий.',
-            '\nВ режиме тренировки результаты не сохраняются', sep='\n')
+            ' В режиме тренировки вы будете решать задания, пока правильно не ответите на указанное количество заданий.',
+            '\n В режиме тренировки результаты не сохраняются', sep='\n')
         print('\n')
         trainingMode = input('Хотите включить режим тренировки? Введите Yes/No ').lower()
         print('\n')
@@ -174,7 +175,7 @@ def start_program():
 
     os.system('cls')
     print(logo)
-    time.sleep(1)
+    time.sleep(0.8)
 
     for i in range(0, time_to_start):
         os.system('cls')
@@ -182,15 +183,15 @@ def start_program():
         print('Starting |', bar, '|', sep='')
         bar = fill + bar
         bar = bar[:bar_length]
-        time.sleep(0.8)
+        time.sleep(0.6)
 
     print('\n')
     print('Сейчас будут выведены все обозначения и приставки.')
-    time.sleep(2)
+    time.sleep(1)
 
     output_info('Все приставки:', **{i: '10^' + str(physics_prefixes[i]) for i in physics_prefixes.keys()})
     output_info('Все единицы измерения:', **units)
-    output_info('Пример решения.', **dict([get_number()]))
+    output_info('Пример решения.', **dict([get_number(2)]))
 
     pause_program()
     os.system('cls')
@@ -198,16 +199,16 @@ def start_program():
 
 def output_info(text, *args, **kwargs):
     print('_' * 50, '\n')
-    time.sleep(0.3)
+    time.sleep(0.25)
     print(text)
-    time.sleep(1.3)
+    time.sleep(1.2)
     for i in range(len(args)):
         print(i, '=', args[i])
-        time.sleep(0.175)
+        time.sleep(0.125)
     for i in kwargs:
         print(i, '=', kwargs[i])
-        time.sleep(0.175)
-    time.sleep(0.3)
+        time.sleep(0.125)
+    time.sleep(0.25)
     print('\n', '_' * 50, sep='')
 
 
@@ -224,7 +225,7 @@ def get_error_program():
 
 def main():
     print('\n')
-    name = input('Введите ваше имя или ключ: ')
+    name = input('Введите ваше имя(для сохранения результатов): ')
 
     trainingMode = set_training_mode()
 
