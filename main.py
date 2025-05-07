@@ -81,7 +81,7 @@ def get_task(number_round):
     os.system('cls')
     print('\n')
     print('Задание: представить число в стандартном виде:', task[0], end='\n' * 3)
-    text = input('Ответ: ')
+    text = input('Ваш ответ: ')
     text = text.replace(' ', '')
     text = text.replace(',', '.', 1)
     text = text.lower()
@@ -114,7 +114,7 @@ def set_training_mode():
             ' В режиме тренировки вы будете решать задания, пока правильно не ответите на указанное количество заданий.',
             '\n В режиме тренировки результаты не сохраняются', sep='\n')
         print('\n')
-        trainingMode = input('Хотите включить режим тренировки? Введите Yes/No ').lower()
+        trainingMode = input('Хотите включить режим тренировки? Введите Yes/No: ').lower()
         print('\n')
 
         if 'y' in trainingMode and not 'n' in trainingMode:
